@@ -1,0 +1,106 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    background-color: #efeeee;
+    justify-content: center;
+    align-content: center;
+    font-family: "Open Sans",sans-serif;
+}
+
+.sidebar {
+    position: fixed;
+    overflow: hidden;
+    width: 2.5vw;
+    top: 2.5vh;
+    left: 0;
+    /*bottom: 2.5vh;*/
+    padding: 2vh 0.75vw;
+    background-color: pink;
+    transition: 0.5s;
+    font-size: 3vw;
+    text-align: center;
+    white-space: nowrap;
+    &:hover {
+        width: 7.5vw;
+    }
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 4vw 81vh auto 2vw;
+    grid-template-rows: 2.5vh 27vh auto 2.5vh;
+    grid-template-areas:
+        ". . . ."
+        ". console map ."
+        ". topics map ."
+        ". . . .";
+    width: 100vw;
+    height: 100vh;
+    .console {
+        grid-area: console;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: 1fr;
+        grid-template-areas:
+            "speed_box cpu_box ram_box";
+        background-color: aquamarine;
+        .speed_box {
+            grid-area: speed_box;
+            background-color: cadetblue;
+        }
+        .cpu_box {
+            grid-area: cpu_box;
+            background-color: coral;
+        }
+        .ram_box {
+            grid-area: ram_box;
+            background-color: cornflowerblue;
+        }
+    }
+    .topics {
+        grid-area: topics;
+        display: grid;
+        grid-template-columns: 12vw 12vw auto;
+        grid-template-rows: 5vh auto;
+        grid-template-areas:
+            "topic_tag terminal_tag ."
+            "main main main";
+        margin-top: 1vh;
+        background-color: skyblue;
+        .topic_tag {
+            grid-area: topic_tag;
+            background-color: cornflowerblue;
+        }
+        .terminal_tag {
+            grid-area: terminal_tag;
+            background-color: coral;
+        }
+        .main {
+            grid-area: main;
+            background-color: aqua;
+        }
+        .sub {
+            width: 100%;
+            height: 100%;
+        }
+        .topic_box {
+            background-color: burlywood;
+        }
+        .terminal_box {
+            display: none;
+            background-color: cornsilk;
+        }
+    }
+    .map {
+        grid-area: map;
+        margin-left: 1vh;
+        background-color: lightgoldenrodyellow;
+    }
+}
+
