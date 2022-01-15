@@ -1,9 +1,18 @@
 $(function () {
     setInterval(function (){
-        $.get("/get", function (data, status) {
-            // alert("数据: " + data + "\n状态: " + status);
+        $.get("/get_ros", function (data, status) {
+            const obj = jQuery.parseJSON(data);
+            if(obj["position"] === false){
+                $(".speed_box").css("background-color", "red");
+                $(".current_pose").css("background-color", "red");
+            }else{
+                $(".speed_box").css("background-color", "cadetblue");
+                $(".current_pose").css("background-color", "cadetblue");
+                $(".speed_box").text(obj["position"]["data"][2]);
+                $(".current_pose").text(obj["position"]["data"][0]+", "+obj["position"]["data"][1]);
+            }
         });
-    }, 1000);
+    }, 500);
 
     setInterval(function (){
         $.get("/get_sys", function (data, status) {
@@ -14,13 +23,13 @@ $(function () {
     }, 3000);
 
     $(".topic_tag").on("click", function (){
-        $(".topic_box").css("display", "block");
-        $(".terminal_box").css("display", "none");
+        $(".topic_box").css("opacity", 1);
+        $(".terminal_box").css("opacity", 0);
     });
 
     $(".terminal_tag").on("click", function (){
-        $(".terminal_box").css("display", "block");
-        $(".topic_box").css("display", "none");
+        $(".terminal_box").css("opacity", 1);
+        $(".topic_box").css("opacity", 0);
     });
 });
 
@@ -29,24 +38,3 @@ $(window).resize(function() {
         $(".topics").css("grid-template-columns", "30vh 30vh auto");
     }
 });
-
-// import * as echarts from 'js/echarts';
-// const option = {
-//         title: {
-//             text: 'Speed'
-//         },
-//         tooltip: {},
-//         legend: {
-//             data:['销量']
-//         },
-//         xAxis: {
-//             data: ["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
-//         },
-//         yAxis: {},
-//         series: [{
-//             name: '销量',
-//             type: 'gauge',
-//             data: [5, 20, 36, 10, 10, 20]
-//         }]
-//     };
-// const speed_chart = echarts.init(document.getElementById('speed')).setOption(option);

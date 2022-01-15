@@ -6,14 +6,13 @@
     <title>Index</title>
     <link rel="stylesheet" href="/static/css/index.css">
     <script src="/static/js/jquery.min.js"></script>
-    <script src="/static/js/echarts.min.js"></script>
     <script src="/static/js/index.js"></script>
 </head>
 
 <body>
 {#    <div id="speed" style="width: 600px;height:350px;"></div>#}
 
-    <div class="sidebar">
+    <div class="sidebar" style="display: none">
         <div>
             <ul class="menu-list">
                 <li class="collapsed">
@@ -35,7 +34,14 @@
             <div class="topic_tag">topics</div>
             <div class="terminal_tag">terminal</div>
             <div class="main">
-                <div class="topic_box sub"></div>
+                <div class="topic_box sub">
+                    <div class="current_pose topic_sub_box">current_pose</div>
+{#                    <div class="vis_pose topic_sub_box">vis_pose</div>#}
+                    <div class="pandar_points topic_sub_box">pandar_points</div>
+                    <div class="lidar_output topic_sub_box">lidar_output</div>
+                    <div class="final_waypoints topic_sub_box">final_waypoints</div>
+                    <div class="command topic_sub_box">command</div>
+                </div>
                 <div class="terminal_box sub"></div>
             </div>
         </div>

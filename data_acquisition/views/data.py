@@ -3,11 +3,13 @@ import json
 from functools import wraps
 from flask import Blueprint, session, redirect, request
 from psutil import cpu_percent, virtual_memory
+from .modules.topics import TopicMonitor
 
 data_bp = Blueprint('data', __name__)
 
 DATA_LIST = ['k1', 'k2', 'k3']
 DATA_DICT = {}
+TOPIC_MONITOR = TopicMonitor()
 
 
 def login_required(func):
@@ -31,11 +33,12 @@ def receive():
     return 'received'
 
 
-@data_bp.route('/get')
-def get_all():
-    print('GET request:', json.dumps(DATA_DICT))
+@data_bp.route('/get_ros')
+def get_ros():
+    res = TOPIC_MONITOR.get()
+    print('GET request:', json.dumps(res))
 
-    return json.dumps(DATA_DICT)
+    return json.dumps(res)
 
 
 @data_bp.route('/get_sys')
@@ -43,7 +46,7 @@ def get_sys():
     cpu = cpu_percent()
     mem = virtual_memory()
     used_mem = round(float(mem.used)/1024/1024/1024, 2)
-    total_mem = float(mem.total)/1024/1024/1024
+    total_mem = round(float(mem.total)/1024/1024/1024, 2)
     res = {'cpu': cpu,
            'used_mem': used_mem,
            'total_mem': total_mem}

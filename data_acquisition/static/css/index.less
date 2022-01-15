@@ -83,18 +83,36 @@ body {
         }
         .main {
             grid-area: main;
+            position: relative;
             background-color: aqua;
-        }
-        .sub {
-            width: 100%;
-            height: 100%;
-        }
-        .topic_box {
-            background-color: burlywood;
-        }
-        .terminal_box {
-            display: none;
-            background-color: cornsilk;
+            .sub {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                left: 0;
+                top: 0;
+                transition: opacity 0.4s;
+            }
+            .topic_box {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: flex-start;
+                align-content: flex-start;
+                background-color: burlywood;
+                .topic_sub_box {
+                    width: 25vh;
+                    height: 25vh;
+                    margin: 1vh 1vh;
+                    background-color: cadetblue;
+                }
+            }
+            .terminal_box {
+                display: flex;
+                justify-content: space-around;
+                align-content: flex-start;
+                opacity: 0;
+                background-color: cornsilk;
+            }
         }
     }
     .map {
