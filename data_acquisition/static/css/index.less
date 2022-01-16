@@ -1,3 +1,10 @@
+@back-color: #efeeee;
+@midl-color: #ffffff;
+@main-color: #e0e0e0;
+@emer-color: pink;
+@shadow-light: #bebebe;
+@shadow-dark: #ffffff;
+
 * {
     margin: 0;
     padding: 0;
@@ -7,7 +14,7 @@ body {
     display: flex;
     width: 100%;
     height: 100%;
-    background-color: #efeeee;
+    background-color: @back-color;
     justify-content: center;
     align-content: center;
     font-family: "Open Sans",sans-serif;
@@ -49,18 +56,37 @@ body {
         grid-template-rows: 1fr;
         grid-template-areas:
             "speed_box cpu_box ram_box";
-        background-color: aquamarine;
+        background-color: transparent;
         .speed_box {
             grid-area: speed_box;
-            background-color: cadetblue;
         }
         .cpu_box {
             grid-area: cpu_box;
-            background-color: coral;
         }
         .ram_box {
             grid-area: ram_box;
-            background-color: cornflowerblue;
+        }
+        .sub {
+            display: flex;
+            margin: 2vh;
+            border-radius: 3vh;
+            background-color: @main-color;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            span {
+                margin-top: 1vh;
+                margin-bottom: -2vh;
+                font-size: 3vh;
+            }
+            div {
+                margin: auto 0;
+                text-align: center;
+                font-size: 4.5vh;
+            }
+        }
+        .emergency {
+            background-color: @emer-color;
         }
     }
     .topics {
@@ -72,7 +98,7 @@ body {
             "topic_tag terminal_tag ."
             "main main main";
         margin-top: 1vh;
-        background-color: skyblue;
+        background-color: transparent;
         .topic_tag {
             grid-area: topic_tag;
             background-color: cornflowerblue;
@@ -84,7 +110,7 @@ body {
         .main {
             grid-area: main;
             position: relative;
-            background-color: aqua;
+            background-color: transparent;
             .sub {
                 position: absolute;
                 width: 100%;
@@ -92,18 +118,45 @@ body {
                 left: 0;
                 top: 0;
                 transition: opacity 0.4s;
+                background-color: @midl-color;
             }
             .topic_box {
                 display: flex;
                 flex-wrap: wrap;
                 justify-content: flex-start;
                 align-content: flex-start;
-                background-color: burlywood;
                 .topic_sub_box {
+                    display: flex;
                     width: 25vh;
                     height: 25vh;
                     margin: 1vh 1vh;
-                    background-color: cadetblue;
+                    border-radius: 4vh;
+                    background-color: @main-color;
+                    flex-flow: column;
+                    justify-content: flex-start;
+                    align-items: center;
+                    span {
+                        margin-top: 1vh;
+                        margin-bottom: -2vh;
+                        font-size: 2vh;
+                    }
+                    div {
+                        margin: auto 0;
+                        text-align: center;
+                        font-size: 4.5vh;
+                    }
+                    ul {
+                        margin: auto 0;
+                        text-align: center;
+                        font-size: 2.5vh;
+                        list-style-type: none;
+                        li {
+                            margin: 0.3vh;
+                        }
+                    }
+                }
+                .emergency {
+                    background-color: @emer-color;
                 }
             }
             .terminal_box {
@@ -111,7 +164,6 @@ body {
                 justify-content: space-around;
                 align-content: flex-start;
                 opacity: 0;
-                background-color: cornsilk;
             }
         }
     }

@@ -42,19 +42,38 @@ body {
   grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: 1fr;
   grid-template-areas: "speed_box cpu_box ram_box";
-  background-color: aquamarine;
+  background-color: transparent;
 }
 .container .console .speed_box {
   grid-area: speed_box;
-  background-color: cadetblue;
 }
 .container .console .cpu_box {
   grid-area: cpu_box;
-  background-color: coral;
 }
 .container .console .ram_box {
   grid-area: ram_box;
-  background-color: cornflowerblue;
+}
+.container .console .sub {
+  display: flex;
+  margin: 2vh;
+  border-radius: 3vh;
+  background-color: #e0e0e0;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+.container .console .sub span {
+  margin-top: 1vh;
+  margin-bottom: -2vh;
+  font-size: 3vh;
+}
+.container .console .sub div {
+  margin: auto 0;
+  text-align: center;
+  font-size: 4.5vh;
+}
+.container .console .emergency {
+  background-color: pink;
 }
 .container .topics {
   grid-area: topics;
@@ -63,7 +82,7 @@ body {
   grid-template-rows: 5vh auto;
   grid-template-areas: "topic_tag terminal_tag ." "main main main";
   margin-top: 1vh;
-  background-color: skyblue;
+  background-color: transparent;
 }
 .container .topics .topic_tag {
   grid-area: topic_tag;
@@ -76,7 +95,7 @@ body {
 .container .topics .main {
   grid-area: main;
   position: relative;
-  background-color: aqua;
+  background-color: transparent;
 }
 .container .topics .main .sub {
   position: absolute;
@@ -85,26 +104,52 @@ body {
   left: 0;
   top: 0;
   transition: opacity 0.4s;
+  background-color: #ffffff;
 }
 .container .topics .main .topic_box {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
   align-content: flex-start;
-  background-color: burlywood;
 }
 .container .topics .main .topic_box .topic_sub_box {
+  display: flex;
   width: 25vh;
   height: 25vh;
   margin: 1vh 1vh;
-  background-color: cadetblue;
+  border-radius: 4vh;
+  background-color: #e0e0e0;
+  flex-flow: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+.container .topics .main .topic_box .topic_sub_box span {
+  margin-top: 1vh;
+  margin-bottom: -2vh;
+  font-size: 2vh;
+}
+.container .topics .main .topic_box .topic_sub_box div {
+  margin: auto 0;
+  text-align: center;
+  font-size: 4.5vh;
+}
+.container .topics .main .topic_box .topic_sub_box ul {
+  margin: auto 0;
+  text-align: center;
+  font-size: 2.5vh;
+  list-style-type: none;
+}
+.container .topics .main .topic_box .topic_sub_box ul li {
+  margin: 0.3vh;
+}
+.container .topics .main .topic_box .emergency {
+  background-color: pink;
 }
 .container .topics .main .terminal_box {
   display: flex;
   justify-content: space-around;
   align-content: flex-start;
   opacity: 0;
-  background-color: cornsilk;
 }
 .container .map {
   grid-area: map;
