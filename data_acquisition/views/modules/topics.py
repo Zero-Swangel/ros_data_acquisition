@@ -25,26 +25,36 @@ class TopicMonitor:
 
     def get(self):
         now_time = rospy.Time.now().to_sec()
+        print('now time:', now_time)
 
-        if now_time - self.position['timestamp'] > 1:
-            self.res['position'] = False
-        else:
-            self.res['position'] = self.position
+        self.res['position'] = self.position
+        self.res['cloud'] = self.cloud
+        self.res['lidar'] = self.lidar
+        self.res['command'] = self.command
 
-        if now_time - self.cloud['timestamp'] > 1:
-            self.res['cloud'] = False
-        else:
-            self.res['cloud'] = self.cloud
-
-        if now_time - self.lidar['timestamp'] > 1:
-            self.res['lidar'] = False
-        else:
-            self.res['lidar'] = self.lidar
-
-        if now_time - self.command['timestamp'] > 1:
-            self.res['command'] = False
-        else:
-            self.res['command'] = self.command
+        # if now_time - self.position['timestamp'] > 1:
+        #     print('current_pose late.', self.position['timestamp'])
+        #     self.res['position'] = False
+        # else:
+        #     self.res['position'] = self.position
+        #
+        # if now_time - self.cloud['timestamp'] > 1:
+        #     print('pandar_points late.', self.position['timestamp'])
+        #     self.res['cloud'] = False
+        # else:
+        #     self.res['cloud'] = self.cloud
+        #
+        # if now_time - self.lidar['timestamp'] > 1:
+        #     print('lidar_output late.', self.position['timestamp'])
+        #     self.res['lidar'] = False
+        # else:
+        #     self.res['lidar'] = self.lidar
+        #
+        # if now_time - self.command['timestamp'] > 1:
+        #     print('command late.', self.position['timestamp'])
+        #     self.res['command'] = False
+        # else:
+        #     self.res['command'] = self.command
 
         return self.res
 
@@ -60,11 +70,20 @@ class TopicMonitor:
 
     def command_callback(self, data):
         self.command = {'timestamp': rospy.Time.now().to_sec(),
-                        'data': data.data}
+                        'data': [round(data.data[0], 2),
+                                 round(data.data[1], 2),
+                                 round(data.data[2], 2),
+                                 round(data.data[3], 2),
+                                 round(data.data[4], 2),
+                                 round(data.data[5], 2)]}
 
     def lidar_callback(self, data):
+        boxes = []
+        for box in data.global_bounding_box_array.boxes:
+            boxes.append([box.pose.position.x, box.pose.position.y])
         self.lidar = {'timestamp': data.header.stamp.to_sec(),
-                      'data': len(data.global_bounding_box_array.boxes)}
+                      'data': {'size': len(data.global_bounding_box_array.boxes),
+                               'boxes': boxes}}
 
 # if __name__ == '__main__':
 #     obj = TopicMonitor()

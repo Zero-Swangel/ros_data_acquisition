@@ -1,62 +1,81 @@
+let scale = 7, dragging = false, pos = {}, posl = {};
+let originX, originY;
+const MINIMUM_SCALE = 1.0;
+
+let current_pose;
+let bounding_box;
+
 $(function () {
-    const $speed_box = $(".speed_box");
     const $current_pose = $(".current_pose");
     const $pandar_points = $(".pandar_points");
     const $lidar_output = $(".lidar_output");
     const $command = $(".command");
+    const $topic_box = $(".topic_box");
+    const $terminal_box = $(".terminal_box");
+    const $canvas = document.getElementById("canvas");
+    const $ctx = $canvas.getContext("2d");
+
+    $canvas.width = $canvas.offsetWidth;
+    $canvas.height = $canvas.offsetHeight;
+    originX = $canvas.width / 2;
+    originY = $canvas.height - 50;
+
     setInterval(function () {
         $.get("/get_ros", function (data, status) {
             const obj = jQuery.parseJSON(data);
             if (obj["position"] === false) {
-                $speed_box.addClass("emergency");
                 $current_pose.addClass("emergency");
             } else {
-                $speed_box.removeClass("emergency");
                 $current_pose.removeClass("emergency");
-                $speed_box.children("div").text(obj["position"]["data"][2]);
-                $current_pose.children("div").text(obj["position"]["data"][0] + ", " + obj["position"]["data"][1]);
+                $current_pose.find(".data").text(obj["position"]["data"][0] + ", " + obj["position"]["data"][1] + "\n" + obj["position"]["data"][2]);
+                current_pose = obj["position"]["data"];
             }
             if (obj["cloud"] === false) {
                 $pandar_points.addClass("emergency");
             } else {
                 $pandar_points.removeClass("emergency");
-                $pandar_points.children("div").text(obj["cloud"]["data"]);
+                $pandar_points.find(".data").text(obj["cloud"]["data"] + " points");
             }
             if (obj["lidar"] === false) {
                 $lidar_output.addClass("emergency");
             } else {
                 $lidar_output.removeClass("emergency");
-                $lidar_output.children("div").text(obj["lidar"]["data"]);
+                $lidar_output.find(".data").text(obj["lidar"]["data"]["size"] + " cones");
+                bounding_box = obj["lidar"]["data"]["boxes"];
             }
             if (obj["command"] === false) {
                 $command.addClass("emergency");
             } else {
                 $command.removeClass("emergency");
-                // $command.children("li").html(obj["command"]["data"]);
-                $command.children("ul").children("li").each(function() {
-                    $(this).text(obj["command"]["data"][$(this).index()].toFixed(2))
-                });
+                $command.find(".data").text(obj["command"]["data"][0] + ", " + obj["command"]["data"][1] + ", " + obj["command"]["data"][2] + "\n" +
+                    obj["command"]["data"][3] + ", " + obj["command"]["data"][4] + ", " + obj["command"]["data"][5]);
             }
+            drawMap();
         });
-    }, 500);
+    }, 100);
 
     setInterval(function () {
         $.get("/get_sys", function (data, status) {
             const obj = jQuery.parseJSON(data);
-            $(".cpu_box div").text(obj["cpu"] + "%");
-            $(".ram_box div").html(obj["used_mem"] + "<br />/" + obj["total_mem"]);
+            $(".cpu_box .data").text(obj["cpu"]);
+            $(".ram_box .data").text(obj["used_mem"] + " / " + obj["total_mem"]);
         });
     }, 3000);
 
     $(".topic_tag").on("click", function () {
-        $(".topic_box").css("opacity", 1);
-        $(".terminal_box").css("opacity", 0);
+        $topic_box.css("z-index", 10);
+        $terminal_box.css("z-index", 1);
+        $topic_box.css("opacity", 1);
+        $terminal_box.css("opacity", 0);
     });
 
     $(".terminal_tag").on("click", function () {
-        $(".terminal_box").css("opacity", 1);
-        $(".topic_box").css("opacity", 0);
+        $terminal_box.css("z-index", 10);
+        $topic_box.css("z-index", 1);
+        $terminal_box.css("opacity", 1);
+        $topic_box.css("opacity", 0);
     });
+    canvasEventsInit();
 });
 
 $(window).resize(function () {
@@ -64,3 +83,83 @@ $(window).resize(function () {
         $(".topics").css("grid-template-columns", "30vh 30vh auto");
     }
 });
+
+function drawMap(x, y) {
+    const $canvas = document.getElementById("canvas");
+    const $ctx = $canvas.getContext("2d");
+    $ctx.clearRect(0, 0, $canvas.width, $canvas.height);
+    $ctx.beginPath();
+
+    $ctx.strokeRect(originX - 5, originY - 5, 10, 10);
+    $ctx.moveTo(originX, originY);
+    $ctx.lineTo(originX + 75, originY);
+    $ctx.moveTo(originX, originY);
+    $ctx.lineTo(originX, originY - 75);
+    $ctx.stroke();
+
+    $ctx.fillStyle = "#ff0000";
+    let box_w = 0.8 * scale;
+    let box_h = 0.8 * scale;
+    $ctx.fillRect(originX + current_pose[0] * scale - box_w / 2, originY - current_pose[1] * scale - box_h / 2, box_w, box_h);
+
+    $.each(bounding_box, function (index, element) {
+        if (arguments.length === 2 && Math.abs($(element)[0] - x) < 0.5 && Math.abs($(element)[1] - y) < 0.5) {
+            $ctx.fillStyle = "#ff4a4a"
+        } else {
+            $ctx.fillStyle = "#87ceeb";
+        }
+        $ctx.fillRect(originX + $(element)[0] * scale - box_w / 2, originY - $(element)[1] * scale - box_h / 2, box_w, box_h);
+    });
+}
+
+function canvasEventsInit() {
+    const $canvas = document.getElementById("canvas");
+
+    $canvas.onmousedown = function (event) {
+        dragging = true;
+        pos = windowToCanvas(event.clientX, event.clientY);
+    };
+    $canvas.onmousemove = function (event) {
+        posl = windowToCanvas(event.clientX, event.clientY);
+        const m_x = ((posl.x - originX) / scale).toFixed(2);
+        const m_y = ((-posl.y + originY) / scale).toFixed(2);
+        $("#m_pos").css("left", event.pageX + 20).css("top", event.pageY).text(m_x + ", " + m_y);
+        if (dragging) {
+            const x = posl.x - pos.x, y = posl.y - pos.y;
+            originX += x;
+            originY += y;
+            pos = JSON.parse(JSON.stringify(posl));
+            drawMap(m_x, m_y);
+        }
+    };
+    $canvas.onmouseup = function () {
+        dragging = false;
+    };
+    $canvas.onmousewheel = $canvas.onwheel = function (event) {
+        pos = windowToCanvas(event.clientX, event.clientY);
+        event.wheelDelta = event.wheelDelta ? event.wheelDelta : (event.deltaY * (-40));
+        posl = {x: ((pos.x - originX) / scale).toFixed(2), y: ((pos.y - originY) / scale).toFixed(2)};
+        if (event.wheelDelta > 0) {
+            scale += 0.1;
+            originX = (1 - scale) * posl.x + (pos.x - posl.x);
+            originY = (1 - scale) * posl.y + (pos.y - posl.y);
+        } else {
+            scale -= 0.1;
+            if (scale < MINIMUM_SCALE) {
+                scale = MINIMUM_SCALE;
+            }
+            originX = (1 - scale) * posl.x + (pos.x - posl.x);
+            originY = (1 - scale) * posl.y + (pos.y - posl.y);
+        }
+        drawMap();
+    };
+}
+
+function windowToCanvas(x, y) {
+    const $canvas = document.getElementById("canvas");
+    const box = $canvas.getBoundingClientRect();
+    return {
+        x: x - box.left - (box.width - $canvas.width) / 2,
+        y: y - box.top - (box.height - $canvas.height) / 2
+    };
+}
