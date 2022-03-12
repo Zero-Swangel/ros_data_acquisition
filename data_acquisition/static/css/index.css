@@ -30,7 +30,7 @@ body {
 }
 .container {
   display: grid;
-  grid-template-columns: 4vw 81vh auto 4vw;
+  grid-template-columns: 8vh 81vh auto 8vh;
   grid-template-rows: 2.5vh 17.5vh auto 2.5vh;
   grid-template-areas: ". . . ." ". console map ." ". topics map ." ". . . .";
   width: 100vw;
@@ -102,10 +102,22 @@ body {
 .container .topics .topic_tag {
   grid-area: topic_tag;
   background-color: cornflowerblue;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.container .topics .topic_tag:hover {
+  cursor: pointer;
 }
 .container .topics .terminal_tag {
   grid-area: terminal_tag;
   background-color: coral;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.container .topics .terminal_tag:hover {
+  cursor: pointer;
 }
 .container .topics .main {
   grid-area: main;
@@ -228,5 +240,48 @@ body {
   -moz-user-select: none;
   -webkit-user-select: none;
   user-select: none;
+}
+.container .map_tag {
+  display: flex;
+  position: fixed;
+  overflow: hidden;
+  width: 6vh;
+  height: 5vh;
+  top: 6vh;
+  left: 90vh;
+  padding: 0 0.75vh;
+  background-color: #7c88f1;
+  transition: 0.5s;
+  font-size: 3vh;
+  align-items: center;
+  white-space: nowrap;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.container .map_tag:hover {
+  width: 12vh;
+  cursor: pointer;
+}
+.container .save_tag {
+  display: flex;
+  position: fixed;
+  overflow: hidden;
+  width: 6vh;
+  height: 5vh;
+  top: 12vh;
+  left: 90vh;
+  padding: 0 0.75vh;
+  background-color: #7c88f1;
+  transition: 0.5s;
+  font-size: 3vh;
+  align-items: center;
+  white-space: nowrap;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.container .save_tag:hover {
+  cursor: pointer;
 }
 /*# sourceMappingURL=index.css.map */

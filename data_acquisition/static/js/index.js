@@ -1,15 +1,19 @@
-let scale = 7, dragging = false, pos = {}, posl = {};
+let scale = 10, dragging = false, moving = false, cheat = false, move_index, pos = {}, posl = {};
 let originX, originY;
 const MINIMUM_SCALE = 1.0;
 
 let current_pose;
 let bounding_box;
+let spline_way;
+let record_way;
 
 $(function () {
     const $current_pose = $(".current_pose");
     const $pandar_points = $(".pandar_points");
     const $lidar_output = $(".lidar_output");
     const $command = $(".command");
+    const $record_way = $(".record_way");
+    // const $record_way = $(".record_way");
     const $topic_box = $(".topic_box");
     const $terminal_box = $(".terminal_box");
     const $canvas = document.getElementById("canvas");
@@ -21,6 +25,9 @@ $(function () {
     originY = $canvas.height - 50;
 
     setInterval(function () {
+        if (cheat) {
+            return;
+        }
         $.get("/get_ros", function (data, status) {
             const obj = jQuery.parseJSON(data);
             if (obj["position"] === false) {
@@ -50,6 +57,18 @@ $(function () {
                 $command.find(".data").text(obj["command"]["data"][0] + ", " + obj["command"]["data"][1] + ", " + obj["command"]["data"][2] + "\n" +
                     obj["command"]["data"][3] + ", " + obj["command"]["data"][4] + ", " + obj["command"]["data"][5]);
             }
+            if (obj["record_way"] === false) {
+                $record_way.addClass("emergency");
+            } else {
+                $record_way.removeClass("emergency");
+                $record_way.find(".data").text(obj["record_way"]["data"].length);
+                record_way = obj["record_way"]["data"];
+            }
+            if (obj["spline_way"] === false) {
+
+            } else {
+                spline_way = obj["spline_way"]["data"];
+            }
             drawMap();
         });
     }, 100);
@@ -75,6 +94,24 @@ $(function () {
         $terminal_box.css("opacity", 1);
         $topic_box.css("opacity", 0);
     });
+
+    $(".map_tag").on("click", function () {
+        if ($(this).text() === "visualize") {
+            $(this).text("cheat");
+            cheat = true;
+            drawMap();
+        } else {
+            $(this).text("visualize");
+            cheat = false;
+        }
+    });
+
+    $(".save_tag").on("click", function () {
+        $.post("/receive_cheat", {"cheat": JSON.stringify(record_way)}, function (data, status) {
+            alert("status: " + status);
+        });
+    });
+
     canvasEventsInit();
 });
 
@@ -99,17 +136,40 @@ function drawMap(x, y) {
 
     $ctx.fillStyle = "#ff0000";
     let box_w = 0.8 * scale;
-    let box_h = 0.8 * scale;
-    $ctx.fillRect(originX + current_pose[0] * scale - box_w / 2, originY - current_pose[1] * scale - box_h / 2, box_w, box_h);
+    let point_w = 0.2 * scale;
+    $ctx.fillRect(originX + current_pose[0] * scale - box_w / 2, originY - current_pose[1] * scale - box_w / 2, box_w, box_w);
 
     $.each(bounding_box, function (index, element) {
-        if (arguments.length === 2 && Math.abs($(element)[0] - x) < 0.5 && Math.abs($(element)[1] - y) < 0.5) {
-            $ctx.fillStyle = "#ff4a4a"
-        } else {
-            $ctx.fillStyle = "#87ceeb";
-        }
-        $ctx.fillRect(originX + $(element)[0] * scale - box_w / 2, originY - $(element)[1] * scale - box_h / 2, box_w, box_h);
+        $ctx.fillStyle = "#87ceeb";
+        $ctx.fillRect(originX + $(element)[0] * scale - box_w / 2, originY - $(element)[1] * scale - box_w / 2, box_w, box_w);
     });
+    $.each(spline_way, function (index, element) {
+        $ctx.fillStyle = "#87eb8f";
+        $ctx.fillRect(originX + $(element)[0] * scale - point_w / 2, originY - $(element)[1] * scale - point_w / 2, point_w, point_w);
+    });
+
+    point_w = 0.4 * scale;
+    if (cheat) {
+        $.each(record_way, function (index, element) {
+            if (arguments.length === 2 && Math.abs($(element)[0] - x) < 0.5 && Math.abs($(element)[1] - y) < 0.2) {
+                dragging = false;
+                if (!moving) {
+                    move_index = index;
+                }
+                moving = true;
+                if (moving && move_index === index) {
+                    record_way[index][0] = Number(x);
+                    record_way[index][1] = Number(y);
+                    $ctx.fillStyle = "#ff4a4a"
+                } else {
+                    $ctx.fillStyle = "#ffe043";
+                }
+            } else {
+                $ctx.fillStyle = "#ffe043";
+            }
+            $ctx.fillRect(originX + record_way[index][0] * scale - point_w / 2, originY - record_way[index][1] * scale - point_w / 2, point_w, point_w);
+        });
+    }
 }
 
 function canvasEventsInit() {
@@ -118,6 +178,14 @@ function canvasEventsInit() {
     $canvas.onmousedown = function (event) {
         dragging = true;
         pos = windowToCanvas(event.clientX, event.clientY);
+        const m_x = ((posl.x - originX) / scale).toFixed(2);
+        const m_y = ((-posl.y + originY) / scale).toFixed(2);
+        $("#m_pos").css("left", event.pageX + 20).css("top", event.pageY).text(m_x + ", " + m_y);
+        if (cheat) {
+            drawMap(m_x, m_y);
+        } else {
+            drawMap();
+        }
     };
     $canvas.onmousemove = function (event) {
         posl = windowToCanvas(event.clientX, event.clientY);
@@ -129,11 +197,20 @@ function canvasEventsInit() {
             originX += x;
             originY += y;
             pos = JSON.parse(JSON.stringify(posl));
+            if (cheat) {
+                drawMap(m_x, m_y);
+            } else {
+                drawMap();
+            }
+        }
+        if (moving) {
+            pos = JSON.parse(JSON.stringify(posl));
             drawMap(m_x, m_y);
         }
     };
     $canvas.onmouseup = function () {
         dragging = false;
+        moving = false;
     };
     $canvas.onmousewheel = $canvas.onwheel = function (event) {
         pos = windowToCanvas(event.clientX, event.clientY);

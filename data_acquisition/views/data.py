@@ -9,6 +9,7 @@ data_bp = Blueprint('data', __name__)
 
 DATA_LIST = ['k1', 'k2', 'k3']
 DATA_DICT = {}
+CHEAT_WAY = {}
 TOPIC_MONITOR = TopicMonitor()
 
 
@@ -30,6 +31,13 @@ def receive():
         if v:
             DATA_DICT[k] = v
     print('POST request:', DATA_DICT)
+    return 'received'
+
+
+@data_bp.route('/receive_cheat', methods=['POST'])
+def receive_cheat():
+    CHEAT_WAY['data'] = request.form.get('cheat')
+    print('POST request:', CHEAT_WAY)
     return 'received'
 
 
