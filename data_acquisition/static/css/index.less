@@ -29,7 +29,7 @@
 @primary-color: #484c7f;
 @secondary-color: #F19828;
 @chart-color1: #7c88f1;
-@chart-color2: #F19828;
+@chart-color2: #f19828;
 @chart-color3: #f5558d;
 @chart-color4: #a7daff;
 @chart-color5: #9cbf3b;
@@ -328,7 +328,8 @@ body {
     overflow: hidden;
     width: 6vh;
     height: 5vh;
-    padding: 0 0.75vh;
+    padding: 0 1.5vh;
+    border-radius: 0 1vh 1vh 0;
     background-color: @chart-color1;
     transition: 0.5s;
     font-size: 3vh;
@@ -346,21 +347,29 @@ body {
   .map_tag {
     top: 6vh;
     left: 90vh;
+    width: 11.5vh;
 
     &:hover {
-      width: 12vh;
       cursor: pointer;
     }
   }
 
   .save_tag {
-    top: 12vh;
+    display: none;
+    opacity: 0;
+    top: 18vh;
     left: 90vh;
+    width: 6.5vh;
+    background-color: @chart-color4;
   }
 
   .vel_tag {
-    top: 18vh;
+    display: none;
+    opacity: 0;
+    top: 12vh;
     left: 90vh;
+    width: 10vh;
+    background-color: @chart-color5;
   }
 
 }

@@ -103,11 +103,23 @@ $(function () {
 
     $(".map_tag").on("click", function () {
         if ($(this).text() === "visualize") {
-            $(this).text("cheat");
+            $(this).text("cheat").css("width", "8vh").css("background-color", "#f19828");
             cheat = true;
+            $(".save_tag").css("display", "flex");
+            $(".vel_tag").css("display", "flex");
+            setTimeout(function () {
+                $(".save_tag").css("opacity", 1);
+                $(".vel_tag").css("opacity", 1);
+            }, 0);
             drawMap();
         } else {
-            $(this).text("visualize");
+            $(this).text("visualize").css("width", "11.5vh").css("background-color", "#7c88f1");
+            $(".save_tag").css("opacity", 0);
+            $(".vel_tag").css("opacity", 0);
+            setTimeout(function () {
+                $(".save_tag").css("display", "none");
+                $(".vel_tag").css("display", "none");
+            }, 500);
             cheat = false;
         }
     });
@@ -119,7 +131,7 @@ $(function () {
     });
 
     $(".vel_tag").on("click", function () {
-        record_way[last_index][2] = Number(prompt("输入该点速度系数", "1.0"));
+        record_way[last_index][2] = Number(prompt("输入第"+last_index+"点速度系数", "1.0"));
         drawMap();
     })
 
@@ -127,9 +139,10 @@ $(function () {
 });
 
 $(window).resize(function () {
-    if ($(".topic_tag").width() + $(".terminal_tag").width() > $(".topics").width()) {
-        $(".topics").css("grid-template-columns", "30vh 30vh auto");
-    }
+    $("#canvas").attr("width", $(".map").css("width")).attr("height", "77.5vh");
+    // if ($(".topic_tag").width() + $(".terminal_tag").width() > $(".topics").width()) {
+    //     $(".topics").css("grid-template-columns", "30vh 30vh auto");
+    // }
 });
 
 function drawMap(x, y) {
@@ -145,7 +158,7 @@ function drawMap(x, y) {
     $ctx.lineTo(originX, originY - 75);
     $ctx.stroke();
 
-    $ctx.fillStyle = "#ff0000";
+    $ctx.fillStyle = "#26bd27";
     let box_w = 0.8 * scale;
     let point_w = 0.2 * scale;
     $ctx.fillRect(originX + current_pose[0] * scale - box_w / 2, originY - current_pose[1] * scale - box_w / 2, box_w, box_w);
@@ -159,7 +172,6 @@ function drawMap(x, y) {
         $ctx.fillRect(originX + $(element)[0] * scale - point_w / 2, originY - $(element)[1] * scale - point_w / 2, point_w, point_w);
     });
 
-    point_w = 0.4 * scale;
     if (cheat) {
         // if (!on_moving) {
         //     boxing = true;
@@ -172,7 +184,8 @@ function drawMap(x, y) {
         // const delta_x = Number(posl.x - pos.x) / scale;
         // const delta_y = Number(posl.y - pos.y) / scale;
         $.each(record_way, function (index, element) {
-            $ctx.fillStyle = "#ffe043";
+            point_w = 0.4 * scale;
+            $ctx.fillStyle = "#ffb30f";
             // if (moving_box && !dragging && (box.x1 - $(element)[0]) * (box.x2 - $(element)[0]) < 0 && (box.y1 - $(element)[1]) * (box.y2 - $(element)[1]) < 0) {
             //     $ctx.fillStyle = "#ff4a4a";
             //     record_way[index][0] += delta_x;
@@ -198,6 +211,7 @@ function drawMap(x, y) {
                     record_way[index][0] = Number(x);
                     record_way[index][1] = Number(y);
                 }
+                point_w = 0.6 * scale
                 $ctx.fillStyle = "#ff4a4a";
             }
             $ctx.fillRect(originX + record_way[index][0] * scale - point_w / 2, originY - record_way[index][1] * scale - point_w / 2, point_w, point_w);

@@ -247,7 +247,8 @@ body {
   overflow: hidden;
   width: 6vh;
   height: 5vh;
-  padding: 0 0.75vh;
+  padding: 0 1.5vh;
+  border-radius: 0 1vh 1vh 0;
   background-color: #7c88f1;
   transition: 0.5s;
   font-size: 3vh;
@@ -263,17 +264,25 @@ body {
 .container .map_tag {
   top: 6vh;
   left: 90vh;
+  width: 11.5vh;
 }
 .container .map_tag:hover {
-  width: 12vh;
   cursor: pointer;
 }
 .container .save_tag {
-  top: 12vh;
-  left: 90vh;
-}
-.container .vel_tag {
+  display: none;
+  opacity: 0;
   top: 18vh;
   left: 90vh;
+  width: 6.5vh;
+  background-color: #a7daff;
+}
+.container .vel_tag {
+  display: none;
+  opacity: 0;
+  top: 12vh;
+  left: 90vh;
+  width: 10vh;
+  background-color: #9cbf3b;
 }
 /*# sourceMappingURL=index.css.map */
