@@ -1,4 +1,10 @@
-let scale = 10, dragging = false, moving = false, cheat = false, move_index, pos = {}, posl = {};
+let scale = 10, dragging = false, moving = false, cheat = false, boxing = false, boxed = false, moving_box = false,
+    on_moving = false,
+    move_index,
+    pos = {},
+    posl = {},
+    posb = {},
+    box = {x1: "", y1: "", x2: "", y2: ""};
 let originX, originY;
 const MINIMUM_SCALE = 1.0;
 
@@ -150,37 +156,74 @@ function drawMap(x, y) {
 
     point_w = 0.4 * scale;
     if (cheat) {
+        // if (!on_moving) {
+        //     boxing = true;
+        //     if (boxed && arguments.length === 2 && (box.x1 - x) * (box.x2 - x) < 0 && (box.y1 - y) * (box.y2 - y) < 0) {
+        //         boxing = false;
+        //         moving_box = true;
+        //     }
+        // }
+
+        const delta_x = Number(posl.x - pos.x) / scale;
+        const delta_y = Number(posl.y - pos.y) / scale;
         $.each(record_way, function (index, element) {
-            if (arguments.length === 2 && Math.abs($(element)[0] - x) < 0.5 && Math.abs($(element)[1] - y) < 0.2) {
-                dragging = false;
-                if (!moving) {
-                    move_index = index;
-                }
-                moving = true;
-                if (moving && move_index === index) {
+            $ctx.fillStyle = "#ffe043";
+            // if (moving_box && !dragging && (box.x1 - $(element)[0]) * (box.x2 - $(element)[0]) < 0 && (box.y1 - $(element)[1]) * (box.y2 - $(element)[1]) < 0) {
+            //     $ctx.fillStyle = "#ff4a4a";
+            //     record_way[index][0] += delta_x;
+            //     record_way[index][1] -= delta_y;
+            // }
+            if (!dragging && move_index === index) {
+                $ctx.fillStyle = "#ff4a4a";
+                if (moving) {
                     record_way[index][0] = Number(x);
                     record_way[index][1] = Number(y);
-                    $ctx.fillStyle = "#ff4a4a"
-                } else {
-                    $ctx.fillStyle = "#ffe043";
                 }
-            } else {
-                $ctx.fillStyle = "#ffe043";
             }
             $ctx.fillRect(originX + record_way[index][0] * scale - point_w / 2, originY - record_way[index][1] * scale - point_w / 2, point_w, point_w);
+
+            if (!moving_box && !dragging && arguments.length === 2 && Math.abs($(element)[0] - x) < 0.5 && Math.abs($(element)[1] - y) < 0.2) {
+                if (!on_moving) {
+                    boxed = false;
+                    boxing = false;
+                    dragging = false;
+                }
+
+                if (!moving && !on_moving) {
+                    moving = true;
+                    move_index = index;
+                }
+            }
         });
+
+        // if (boxing) {
+        //     $ctx.strokeRect(originX + posb.x * scale, originY - posb.y * scale, (x - posb.x) * scale, -(y - posb.y) * scale);
+        //     boxed = false;
+        // }
+        //
+        // if (boxed) {
+        //     $ctx.strokeRect(originX + box.x1 * scale, originY - box.y1 * scale, (box.x2 - box.x1) * scale, -(box.y2 - box.y1) * scale);
+        // }
     }
 }
 
 function canvasEventsInit() {
     const $canvas = document.getElementById("canvas");
 
-    $canvas.onmousedown = function (event) {
+    $canvas.oncontextmenu = function (event) {
+        on_moving = false;
+        boxing = false;
         dragging = true;
+        moving = false;
         pos = windowToCanvas(event.clientX, event.clientY);
-        const m_x = ((posl.x - originX) / scale).toFixed(2);
-        const m_y = ((-posl.y + originY) / scale).toFixed(2);
-        $("#m_pos").css("left", event.pageX + 20).css("top", event.pageY).text(m_x + ", " + m_y);
+        return false;
+    };
+
+    $canvas.onmousedown = function (event) {
+        on_moving = false;
+        pos = windowToCanvas(event.clientX, event.clientY);
+        const [m_x, m_y] = mousePos();
+        posb = {x: m_x, y: m_y};
         if (cheat) {
             drawMap(m_x, m_y);
         } else {
@@ -188,40 +231,43 @@ function canvasEventsInit() {
         }
     };
     $canvas.onmousemove = function (event) {
+        on_moving = true;
         posl = windowToCanvas(event.clientX, event.clientY);
-        const m_x = ((posl.x - originX) / scale).toFixed(2);
-        const m_y = ((-posl.y + originY) / scale).toFixed(2);
-        $("#m_pos").css("left", event.pageX + 20).css("top", event.pageY).text(m_x + ", " + m_y);
+        const [m_x, m_y] = updatePosTag();
         if (dragging) {
             const x = posl.x - pos.x, y = posl.y - pos.y;
             originX += x;
             originY += y;
             pos = JSON.parse(JSON.stringify(posl));
-            if (cheat) {
-                drawMap(m_x, m_y);
-            } else {
-                drawMap();
-            }
-        }
-        if (moving) {
-            pos = JSON.parse(JSON.stringify(posl));
+            drawMap();
+        } else if (moving || boxing || moving_box) {
             drawMap(m_x, m_y);
         }
     };
     $canvas.onmouseup = function () {
+        on_moving = false;
         dragging = false;
         moving = false;
+        moving_box = false;
+        if (boxing) {
+            boxed = true;
+            box.x1 = posb.x;
+            box.y1 = posb.y;
+            [box.x2, box.y2] = mousePos();
+        }
+        boxing = false;
+        move_index = -1;
     };
     $canvas.onmousewheel = $canvas.onwheel = function (event) {
         pos = windowToCanvas(event.clientX, event.clientY);
         event.wheelDelta = event.wheelDelta ? event.wheelDelta : (event.deltaY * (-40));
         posl = {x: ((pos.x - originX) / scale).toFixed(2), y: ((pos.y - originY) / scale).toFixed(2)};
         if (event.wheelDelta > 0) {
-            scale += 0.1;
+            scale += 0.2;
             originX = (1 - scale) * posl.x + (pos.x - posl.x);
             originY = (1 - scale) * posl.y + (pos.y - posl.y);
         } else {
-            scale -= 0.1;
+            scale -= 0.2;
             if (scale < MINIMUM_SCALE) {
                 scale = MINIMUM_SCALE;
             }
@@ -239,4 +285,17 @@ function windowToCanvas(x, y) {
         x: x - box.left - (box.width - $canvas.width) / 2,
         y: y - box.top - (box.height - $canvas.height) / 2
     };
+}
+
+function updatePosTag(c) {
+    const m_x = ((posl.x - originX) / scale).toFixed(2);
+    const m_y = ((-posl.y + originY) / scale).toFixed(2);
+    $("#m_pos").css("left", event.pageX + 20).css("top", event.pageY).text(m_x + ", " + m_y);
+    return [m_x, m_y];
+}
+
+function mousePos() {
+    const m_x = ((posl.x - originX) / scale).toFixed(2);
+    const m_y = ((-posl.y + originY) / scale).toFixed(2);
+    return [m_x, m_y];
 }
