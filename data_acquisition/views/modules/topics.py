@@ -99,7 +99,7 @@ class TopicMonitor:
         points = []
         if data.id == 0:
             for point in data.points:
-                points.append([point.x, point.y])
+                points.append([point.x, point.y, 1])
         self.record_way = {'timestamp': data.header.stamp.to_sec(), 'data': points}
 
     def spline_way_callback(self, data):

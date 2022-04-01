@@ -1,6 +1,6 @@
 let scale = 10, dragging = false, moving = false, cheat = false, boxing = false, boxed = false, moving_box = false,
     on_moving = false,
-    move_index,
+    move_index, last_index,
     pos = {},
     posl = {},
     posb = {},
@@ -118,6 +118,11 @@ $(function () {
         });
     });
 
+    $(".vel_tag").on("click", function () {
+        record_way[last_index][2] = Number(prompt("输入该点速度系数", "1.0"));
+        drawMap();
+    })
+
     canvasEventsInit();
 });
 
@@ -164,8 +169,8 @@ function drawMap(x, y) {
         //     }
         // }
 
-        const delta_x = Number(posl.x - pos.x) / scale;
-        const delta_y = Number(posl.y - pos.y) / scale;
+        // const delta_x = Number(posl.x - pos.x) / scale;
+        // const delta_y = Number(posl.y - pos.y) / scale;
         $.each(record_way, function (index, element) {
             $ctx.fillStyle = "#ffe043";
             // if (moving_box && !dragging && (box.x1 - $(element)[0]) * (box.x2 - $(element)[0]) < 0 && (box.y1 - $(element)[1]) * (box.y2 - $(element)[1]) < 0) {
@@ -173,14 +178,6 @@ function drawMap(x, y) {
             //     record_way[index][0] += delta_x;
             //     record_way[index][1] -= delta_y;
             // }
-            if (!dragging && move_index === index) {
-                $ctx.fillStyle = "#ff4a4a";
-                if (moving) {
-                    record_way[index][0] = Number(x);
-                    record_way[index][1] = Number(y);
-                }
-            }
-            $ctx.fillRect(originX + record_way[index][0] * scale - point_w / 2, originY - record_way[index][1] * scale - point_w / 2, point_w, point_w);
 
             if (!moving_box && !dragging && arguments.length === 2 && Math.abs($(element)[0] - x) < 0.5 && Math.abs($(element)[1] - y) < 0.2) {
                 if (!on_moving) {
@@ -192,7 +189,22 @@ function drawMap(x, y) {
                 if (!moving && !on_moving) {
                     moving = true;
                     move_index = index;
+                    last_index = index;
                 }
+            }
+
+            if (!dragging && move_index === index) {
+                if (on_moving && moving) {
+                    record_way[index][0] = Number(x);
+                    record_way[index][1] = Number(y);
+                }
+                $ctx.fillStyle = "#ff4a4a";
+            }
+            $ctx.fillRect(originX + record_way[index][0] * scale - point_w / 2, originY - record_way[index][1] * scale - point_w / 2, point_w, point_w);
+            if (record_way[index][2] !== 1) {
+                $ctx.fillStyle = "#000000";
+                $ctx.font = "10px Arial";
+                $ctx.fillText(record_way[index][2], originX + record_way[index][0] * scale, originY - record_way[index][1] * scale);
             }
         });
 

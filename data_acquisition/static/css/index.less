@@ -322,14 +322,12 @@ body {
     }
   }
 
-  .map_tag {
+  .m_tag {
     display: flex;
     position: fixed;
     overflow: hidden;
     width: 6vh;
     height: 5vh;
-    top: 6vh;
-    left: 90vh;
     padding: 0 0.75vh;
     background-color: @chart-color1;
     transition: 0.5s;
@@ -339,6 +337,15 @@ body {
     -moz-user-select: none;
     -webkit-user-select: none;
     user-select: none;
+
+    &:hover {
+      cursor: pointer;
+    }
+  }
+
+  .map_tag {
+    top: 6vh;
+    left: 90vh;
 
     &:hover {
       width: 12vh;
@@ -347,26 +354,13 @@ body {
   }
 
   .save_tag {
-    display: flex;
-    position: fixed;
-    overflow: hidden;
-    width: 6vh;
-    height: 5vh;
     top: 12vh;
     left: 90vh;
-    padding: 0 0.75vh;
-    background-color: @chart-color1;
-    transition: 0.5s;
-    font-size: 3vh;
-    align-items: center;
-    white-space: nowrap;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    user-select: none;
+  }
 
-    &:hover {
-      cursor: pointer;
-    }
+  .vel_tag {
+    top: 18vh;
+    left: 90vh;
   }
 
 }

@@ -241,14 +241,12 @@ body {
   -webkit-user-select: none;
   user-select: none;
 }
-.container .map_tag {
+.container .m_tag {
   display: flex;
   position: fixed;
   overflow: hidden;
   width: 6vh;
   height: 5vh;
-  top: 6vh;
-  left: 90vh;
   padding: 0 0.75vh;
   background-color: #7c88f1;
   transition: 0.5s;
@@ -258,30 +256,24 @@ body {
   -moz-user-select: none;
   -webkit-user-select: none;
   user-select: none;
+}
+.container .m_tag:hover {
+  cursor: pointer;
+}
+.container .map_tag {
+  top: 6vh;
+  left: 90vh;
 }
 .container .map_tag:hover {
   width: 12vh;
   cursor: pointer;
 }
 .container .save_tag {
-  display: flex;
-  position: fixed;
-  overflow: hidden;
-  width: 6vh;
-  height: 5vh;
   top: 12vh;
   left: 90vh;
-  padding: 0 0.75vh;
-  background-color: #7c88f1;
-  transition: 0.5s;
-  font-size: 3vh;
-  align-items: center;
-  white-space: nowrap;
-  -moz-user-select: none;
-  -webkit-user-select: none;
-  user-select: none;
 }
-.container .save_tag:hover {
-  cursor: pointer;
+.container .vel_tag {
+  top: 18vh;
+  left: 90vh;
 }
 /*# sourceMappingURL=index.css.map */
