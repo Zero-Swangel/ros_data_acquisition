@@ -1,10 +1,8 @@
-let scale = 10, dragging = false, moving = false, cheat = false, boxing = false, boxed = false, moving_box = false,
-    on_moving = false,
-    move_index, last_index,
-    pos = {},
-    posl = {},
-    posb = {},
-    box = {x1: "", y1: "", x2: "", y2: ""};
+let scale = 10;
+let dragging = false, moving = false, cheat = false, boxing = false, boxed = false, moving_box = false,
+    on_moving = false;
+let move_index = [], last_index;
+let pos = {}, posl = {}, posb = {}, box = {x1: 0, y1: 0, x2: 0, y2: 0};
 let originX, originY;
 const MINIMUM_SCALE = 1.0;
 
@@ -131,7 +129,7 @@ $(function () {
     });
 
     $(".vel_tag").on("click", function () {
-        record_way[last_index][2] = Number(prompt("输入第"+last_index+"点速度系数", "1.0"));
+        record_way[last_index][2] = Number(prompt("输入第" + last_index + "点速度系数", "1.0"));
         drawMap();
     })
 
@@ -173,24 +171,29 @@ function drawMap(x, y) {
     });
 
     if (cheat) {
-        // if (!on_moving) {
-        //     boxing = true;
-        //     if (boxed && arguments.length === 2 && (box.x1 - x) * (box.x2 - x) < 0 && (box.y1 - y) * (box.y2 - y) < 0) {
-        //         boxing = false;
-        //         moving_box = true;
-        //     }
-        // }
+        if (!on_moving) {
+            boxing = true;
+            if (boxed && arguments.length === 2 && (box.x1 - x) * (box.x2 - x) < 0 && (box.y1 - y) * (box.y2 - y) < 0) {
+                boxing = false;
+                moving_box = true;
+            }
+        }
 
-        // const delta_x = Number(posl.x - pos.x) / scale;
-        // const delta_y = Number(posl.y - pos.y) / scale;
+        const delta_x = Number(posl.x - pos.x) / scale;
+        const delta_y = Number(posl.y - pos.y) / scale;
+        box.x1 = Number(box.x1 + delta_x);
+        box.x2 = Number(box.x2 + delta_x);
+        box.y1 = Number(box.y1 - delta_y);
+        box.y2 = Number(box.y2 - delta_y);
+
         $.each(record_way, function (index, element) {
             point_w = 0.4 * scale;
             $ctx.fillStyle = "#ffb30f";
-            // if (moving_box && !dragging && (box.x1 - $(element)[0]) * (box.x2 - $(element)[0]) < 0 && (box.y1 - $(element)[1]) * (box.y2 - $(element)[1]) < 0) {
-            //     $ctx.fillStyle = "#ff4a4a";
-            //     record_way[index][0] += delta_x;
-            //     record_way[index][1] -= delta_y;
-            // }
+            if (moving_box && !dragging && (box.x1 - $(element)[0]) * (box.x2 - $(element)[0]) < 0 && (box.y1 - $(element)[1]) * (box.y2 - $(element)[1]) < 0) {
+                if (!on_moving) {
+                    move_index.push(index);
+                }
+            }
 
             if (!moving_box && !dragging && arguments.length === 2 && Math.abs($(element)[0] - x) < 0.5 && Math.abs($(element)[1] - y) < 0.2) {
                 if (!on_moving) {
@@ -201,15 +204,19 @@ function drawMap(x, y) {
 
                 if (!moving && !on_moving) {
                     moving = true;
-                    move_index = index;
+                    move_index.push(index);
                     last_index = index;
                 }
             }
 
-            if (!dragging && move_index === index) {
+            if (!dragging && move_index.indexOf(index) !== -1) {
                 if (on_moving && moving) {
                     record_way[index][0] = Number(x);
                     record_way[index][1] = Number(y);
+                }
+                if (on_moving && moving_box) {
+                    record_way[index][0] += delta_x;
+                    record_way[index][1] -= delta_y;
                 }
                 point_w = 0.6 * scale
                 $ctx.fillStyle = "#ff4a4a";
@@ -222,14 +229,14 @@ function drawMap(x, y) {
             }
         });
 
-        // if (boxing) {
-        //     $ctx.strokeRect(originX + posb.x * scale, originY - posb.y * scale, (x - posb.x) * scale, -(y - posb.y) * scale);
-        //     boxed = false;
-        // }
-        //
-        // if (boxed) {
-        //     $ctx.strokeRect(originX + box.x1 * scale, originY - box.y1 * scale, (box.x2 - box.x1) * scale, -(box.y2 - box.y1) * scale);
-        // }
+        if (boxing) {
+            $ctx.strokeRect(originX + posb.x * scale, originY - posb.y * scale, (x - posb.x) * scale, -(y - posb.y) * scale);
+            boxed = false;
+        }
+
+        if (boxed) {
+            $ctx.strokeRect(originX + box.x1 * scale, originY - box.y1 * scale, (box.x2 - box.x1) * scale, -(box.y2 - box.y1) * scale);
+        }
     }
 }
 
@@ -268,6 +275,7 @@ function canvasEventsInit() {
             drawMap();
         } else if (moving || boxing || moving_box) {
             drawMap(m_x, m_y);
+            pos = JSON.parse(JSON.stringify(posl));
         }
     };
     $canvas.onmouseup = function () {
@@ -277,12 +285,12 @@ function canvasEventsInit() {
         moving_box = false;
         if (boxing) {
             boxed = true;
-            box.x1 = posb.x;
-            box.y1 = posb.y;
+            box.x1 = Number(posb.x);
+            box.y1 = Number(posb.y);
             [box.x2, box.y2] = mousePos();
         }
         boxing = false;
-        move_index = -1;
+        move_index = [];
     };
     $canvas.onmousewheel = $canvas.onwheel = function (event) {
         pos = windowToCanvas(event.clientX, event.clientY);
