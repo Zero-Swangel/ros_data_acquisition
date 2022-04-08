@@ -2,7 +2,7 @@
 from flask import Flask
 # from redis import Redis
 # from flask_session import RedisSessionInterface
-from .views import index, account, data
+from .views import index, account, data, websocket
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 app.debug = False
@@ -16,3 +16,4 @@ app.secret_key = 'Ihazy2a1bnxmvYKtoRYm3lnr0ISfFgOU'
 app.register_blueprint(index.index_bp)
 app.register_blueprint(account.account_bp)
 app.register_blueprint(data.data_bp)
+app.register_blueprint(websocket.websocket_bp)

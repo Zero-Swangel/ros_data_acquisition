@@ -11,6 +11,10 @@ let bounding_box;
 let spline_way;
 let record_way;
 
+let term;
+let cols, rows;
+let command = "";
+
 $(function () {
     const $current_pose = $(".current_pose");
     const $pandar_points = $(".pandar_points");
@@ -58,8 +62,7 @@ $(function () {
                 $command.addClass("emergency");
             } else {
                 $command.removeClass("emergency");
-                $command.find(".data").text(obj["command"]["data"][0] + ", " + obj["command"]["data"][1] + ", " + obj["command"]["data"][2] + "\n" +
-                    obj["command"]["data"][3] + ", " + obj["command"]["data"][4] + ", " + obj["command"]["data"][5]);
+                $command.find(".data").text(obj["command"]["data"][0] + ", " + obj["command"]["data"][1] + ", " + obj["command"]["data"][2] + "\n" + obj["command"]["data"][3] + ", " + obj["command"]["data"][4] + ", " + obj["command"]["data"][5]);
             }
             if (obj["record_way"] === false) {
                 $record_way.addClass("emergency");
@@ -134,13 +137,15 @@ $(function () {
     })
 
     canvasEventsInit();
+    terminalEventsInit();
 });
 
 $(window).resize(function () {
     $("#canvas").attr("width", $(".map").css("width")).attr("height", "77.5vh");
-    // if ($(".topic_tag").width() + $(".terminal_tag").width() > $(".topics").width()) {
-    //     $(".topics").css("grid-template-columns", "30vh 30vh auto");
-    // }
+
+    let cols = getBoxSize().cols;
+    let rows = getBoxSize().rows;
+    term.resize(cols, rows)
 });
 
 function drawMap(x, y) {
@@ -312,12 +317,58 @@ function canvasEventsInit() {
     };
 }
 
+function terminalEventsInit() {
+    [cols, rows] = getBoxSize();
+    term = new Terminal({
+        rendererType: "canvas",
+        // cols: cols,
+        // rows: rows,
+        useStyle: true,
+        cursorBlink: true,
+        cursorStyle: 'underline',
+        convertEol: true,
+    });
+    term.open(document.getElementById('terminal'));
+    term.write("\x1b[33m$\x1b[0m ");
+    term.onData(function (data) {
+        if (data.length>1) alert("暂不支持粘贴！");
+        const data_asc = data.charCodeAt(0);
+        if (data_asc === 13) {
+            term.write("\r\n\x1b[33m$\x1b[0m ");
+            //// 发送到后端
+            command = "";
+        } else if (data_asc === 127) {
+            if (term._core.buffer.x > 2) {
+                term.write('\b \b');
+                command = command.substr(0, command.length - 1);
+            }
+        } else if (data_asc === 3) {
+            console.log('复制');
+        } else if (data_asc === 22) {
+            console.log('粘贴');
+        } else if (data_asc === 24) {
+            console.log('剪切');
+        } else if (data_asc === 27) {
+            // console.log(data.charCodeAt(2));
+            if (data.charCodeAt(2) === 65 || data.charCodeAt(2) === 66) {
+                console.log('上下');
+            }
+            if (data.charCodeAt(2) === 68 || data.charCodeAt(2) === 67) {
+                console.log('左右');
+            }
+        } else if (data_asc >= 32 && data_asc <= 127) {
+            term.write(data);
+            command += data;
+            console.log(command);
+        }
+    });
+}
+
 function windowToCanvas(x, y) {
     const $canvas = document.getElementById("canvas");
     const box = $canvas.getBoundingClientRect();
     return {
-        x: x - box.left - (box.width - $canvas.width) / 2,
-        y: y - box.top - (box.height - $canvas.height) / 2
+        x: x - box.left - (box.width - $canvas.width) / 2, y: y - box.top - (box.height - $canvas.height) / 2
     };
 }
 
@@ -332,4 +383,13 @@ function mousePos() {
     const m_x = ((posl.x - originX) / scale).toFixed(2);
     const m_y = ((-posl.y + originY) / scale).toFixed(2);
     return [m_x, m_y];
+}
+
+function getBoxSize() {
+    const init_width = 9;
+    const init_height = 17;
+
+    const windows_width = $(window).width();
+    const windows_height = $(window).height();
+    return [Math.floor(windows_width / init_width), Math.floor(windows_height / init_height)]
 }
