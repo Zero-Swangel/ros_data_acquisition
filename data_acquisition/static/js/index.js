@@ -69,12 +69,12 @@ $(function () {
             } else {
                 $record_way.removeClass("emergency");
                 $record_way.find(".data").text(obj["record_way"]["data"].length);
-                record_way = obj["record_way"]["data"];
+                // record_way = obj["record_way"]["data"];
             }
             if (obj["spline_way"] === false) {
 
             } else {
-                spline_way = obj["spline_way"]["data"];
+                // spline_way = obj["spline_way"]["data"];
             }
             drawMap();
         });
@@ -105,6 +105,9 @@ $(function () {
     $(".map_tag").on("click", function () {
         if ($(this).text() === "visualize") {
             $(this).text("cheat").css("width", "8vh").css("background-color", "#f19828");
+            $.get("/get_cheat", function (data, status) {
+                record_way = jQuery.parseJSON(data);
+            })
             cheat = true;
             $(".save_tag").css("display", "flex");
             $(".vel_tag").css("display", "flex");

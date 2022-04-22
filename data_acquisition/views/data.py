@@ -3,7 +3,10 @@ import json
 from functools import wraps
 from flask import Blueprint, session, redirect, request
 from psutil import cpu_percent, virtual_memory
-from .modules.topics import TopicMonitor
+
+import cheat_io
+from modules.topics import TopicMonitor
+import modules.cheat_io
 
 data_bp = Blueprint('data', __name__)
 
@@ -11,6 +14,7 @@ DATA_LIST = ['k1', 'k2', 'k3']
 DATA_DICT = {}
 CHEAT_WAY = {}
 TOPIC_MONITOR = TopicMonitor()
+CHEAT_FILE = '/home/walker-ubuntu/Walkerspace/Python_ws/data_acquisition/data_acquisition/views/modules/test_file'
 
 
 def login_required(func):
@@ -36,7 +40,8 @@ def receive():
 
 @data_bp.route('/receive_cheat', methods=['POST'])
 def receive_cheat():
-    CHEAT_WAY['data'] = request.form.get('cheat')
+    CHEAT_WAY['data'] = json.loads(request.form.get('cheat'))
+    cheat_io.write_into_file(CHEAT_FILE, CHEAT_WAY['data'])
     print('POST request:', CHEAT_WAY)
     return 'received'
 
@@ -44,6 +49,14 @@ def receive_cheat():
 @data_bp.route('/get_ros')
 def get_ros():
     res = TOPIC_MONITOR.get()
+    print('GET request:', json.dumps(res))
+
+    return json.dumps(res)
+
+
+@data_bp.route('/get_cheat')
+def get_cheat():
+    res = cheat_io.read_from_file(CHEAT_FILE)
     print('GET request:', json.dumps(res))
 
     return json.dumps(res)
